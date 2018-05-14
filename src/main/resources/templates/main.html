@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>数据库管理后台</title>
+    <link rel="stylesheet" href="../layui/css/layui.css">
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">数据库管理页面</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+        <ul class="layui-nav layui-layout-left">
+            <li class="layui-nav-item"><a href="">控制台</a></li>x
+        </ul>
+
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree"  lay-filter="test">
+                <li class="layui-nav-item"><a href="/">备份其他数据库</a></li>
+            </ul>
+        </div>
+    </div>
+    <style>
+        #tablenamelist{
+            width: 250px;
+        }
+        .tableinfo{
+            margin-top: 10px;
+        }
+    </style>
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;">
+            <div class="layui-bg-green" style="width: 100px;height:30px; text-align: center;padding-top: 13px" >
+                <input id="all" type="checkbox" ><span style="font-size: 15px"><b>全选</b></span>
+            </div>
+            <div class="layui-row layui-col-space10" style="margin-top: 10px">
+                <div class="layui-col-md3" th:each="InformatuonSchema : ${result.data}">
+                    <div class="tableinfo">
+                        <input name="tablename" type="checkbox" th:value="${InformatuonSchema.tableName}"/>
+                        <span th:text="${InformatuonSchema.tableName}"></span>
+                    </div>
+                    <hr class="layui-bg-green">
+                </div>
+            </div>
+            <input class="layui-btn" type="button" value="备份" id="sub" onclick="sub"/>
+
+
+
+
+        </div>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © layui.com - 底部固定区域
+    </div>
+</div>
+<!--<script src="../layui/layui.js"></script>-->
+<script src="../jquery-3.3.1.js"></script>
+<script src="../layer/layer.js"></script>
+<script>
+    /*//JavaScript代码区域
+    layui.use('element', function(){
+        var element = layui.element;
+
+    });*/
+
+    /**
+     * 提交数据到后台的接口
+     */
+    jQuery("#sub").click(function () {
+
+        var allcheckbox = jQuery('[name=tablename]');
+        var str = '';
+        for(var index=0;index<allcheckbox.length;index++){
+             if(allcheckbox[index].checked){
+                     str += allcheckbox[index].value+',';
+             }
+        }
+         jQuery.ajax({
+             type: "GET",
+             url: "/result/backup",
+             data: {tablenames:str},
+             dataType: "json",
+             success: function(data){
+                 if(data.rel){
+                     layer.alert(data.data,{icon: 6});
+
+                 }else{
+                     layer.alert(data.message,{icon: 5});
+
+                 }
+             }
+         })
+
+    })
+
+    /**
+     * 全选
+     */
+    jQuery("#all").click(function(){
+        $("[name=tablename]").attr("checked",false);
+        if(this.checked){
+            $("[name=tablename]").attr("checked",true);}
+        else{ $("[name=tablename]").attr("checked",false);}
+    });
+
+
+
+    /*function checkallbox() {
+        console.log("111");
+        var all=jQuery('#all');
+        var allcheckbox = jQuery('[name=tablename]');
+        console.log(all)
+        if(all.checked==true){
+            for(var i=0;i<allcheckbox.length;i++){
+                allcheckbox[i].checked=true;
+            }
+        }else{
+            for(var i=0;i<allcheckbox.length;i++){
+                allcheckbox[i].checked=false;
+            }
+        }
+    }*/
+
+
+
+
+
+</script>
+</body>
+</html>

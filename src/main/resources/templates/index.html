@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.springframework.org/schema/mvc">
+<head>
+    <meta charset="UTF-8">
+    <title>数据库信息录入</title>
+    <link rel="stylesheet" href="../layui/css/layui.css">
+    <style>
+        #formdiv{
+            width: 500px;
+            height: 380px;
+            margin-top: 200px;
+            rbga(0,0,0,0.2);
+            padding-top: 20px;
+            margin-left: 57%;
+        }
+        .layui-form-label{text-align: left;
+        }
+    </style>
+</head>
+<body style="background-image:url(../image/background.jpg);background-repeat:no-repeat;background-size: cover;" >
+
+    <div id="formdiv" style="background: rgba(7, 17,27,0.5);">
+        <h1>数据库备份</h1>
+        <hr class="layui-bg-green">
+        <div  th:style="${result.rel==false}?'color:red':''" style="text-align: center">
+            <span th:text="${result.message}"></span>
+        </div>
+        <form class="layui-form" action="/loaddbinfo" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label">数据库地址:</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="ip" required  lay-verify="required" placeholder="请输入数据库地址" autocomplete="off" class="layui-input" value="119.23.221.234">
+                </div>
+                <div class="layui-form-mid layui-word-aux">可以是rds地址</div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">数据库名称:</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="schemaname" required lay-verify="required" placeholder="请输入数据库名称" autocomplete="off" class="layui-input" value="app">
+                </div>
+                <div class="layui-form-mid layui-word-aux">不区分大小写</div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">登录用户名:</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="user" required lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input" value="three">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">登录密码:</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="password" required lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input" value="jsd1406">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">数据库类型:</label>
+                <div class="layui-input-inline">
+                    <select name="dbType" lay-verify="required">
+                        <option value=""></option>
+                        <option value="mysql">mysql</option>
+                        <option value="sqlserver">sqlserver</option>
+                        <option value="oracle">oracle</option>
+                        <option value="mango">mango</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    <script src="../layui/layui.js"></script>
+    <script src="../jquery-3.3.1.js"></script>
+    <script>
+        //Demo
+        layui.use('form', function(){
+            var form = layui.form;
+
+            //监听提交
+            form.on('submit(formDemo)', function(data){
+                //layer.msg(JSON.stringify(data.field));
+                return true;
+            });
+        });
+    </script>
+</body>
+</html>
