@@ -1,10 +1,435 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<!--多图标共存-->
+
+<style>
+        #tools{
+                height: 100px;
+        }
+        #tools div{
+                height: 82%;
+        }
+        #container,#container1,#container2,#container3{
+                height: 646px;
+        }
+        .title{
+                margin: auto;
+                width: 80%;
+                height: 90%;
+                background: #ffffff;
+        }
+        .property{
+                margin: auto;
+                padding-top: 2px;
+        }
+        .Option{
+                font-size: 30px;
+        }
+        .OptionName{
+                color: #d5e2f2 ;
+        }
+</style>
+
+
+<div id="tools" class="layui-row layui-col-space1">
+        <div class="layui-col-md3">
+                <div class="grid-demo grid-demo-bg1 title" >
+                        <div class="layui-col-md1"></div>
+                        <div class="layui-col-md4">
+                                <i class="layui-icon layui-icon-loading" style="font-size: 60px; color: #1E9FFF;"></i>
+                        </div>
+                        <div class="layui-col-md7 property">
+                                <p class="Option" id="connectionCount"></p>
+                                <p class="OptionName">连接数</p>
+                        </div>
+
+                </div>
+        </div>
+        <div class="layui-col-md3">
+                <div class="grid-demo title" >
+                        <div class="layui-col-md1"></div>
+                        <div class="layui-col-md4">
+                                <i class="layui-icon layui-icon-link" style="font-size: 60px; color: #1E9FFF;"></i>
+                        </div>
+                        <div class="layui-col-md7 property">
+                                <p class="Option" id="isUseConnection"></p>
+                                <p class="OptionName">使用的连接数</p>
+                        </div>
+
+                </div>
+        </div>
+        <div class="layui-col-md3">
+                <div class="grid-demo grid-demo-bg1 title" >
+                        <div class="layui-col-md1"></div>
+                        <div class="layui-col-md4">
+                                <i class="layui-icon layui-icon-set-fill" style="font-size: 60px; color: #1E9FFF;"></i>
+                        </div>
+                        <div class="layui-col-md7 property">
+                                <p class="Option" id="maxConnection"></p>
+                                <p class="OptionName">最大连接数</p>
+                        </div>
+
+                </div>
+        </div>
+        <div class="layui-col-md3">
+                <div class="grid-demo title" >
+                        <div class="layui-col-md1"></div>
+                        <div class="layui-col-md4">
+                                <i class="layui-icon layui-icon-engine" style="font-size: 60px; color: #1E9FFF;"></i>
+                        </div>
+                        <div class="layui-col-md7 property">
+                                <p class="Option" id="runTime"></p>
+                                <p class="OptionName">运行时间</p>
+                        </div>
+
+                </div>
+        </div>
+</div>
+
+<div id="container">
+</div>
+<hr class="layui-bg-green">
+<div id="container3">
+</div>
+<hr class="layui-bg-green">
+<div id="container1">
+</div>
+<hr class="layui-bg-green">
+<div id="container2">
+</div>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet"  href="../layui/css/modules/layer/default/layer.css"/>
+<link rel="stylesheet"  href="../layer/theme/default/layer.css"/>
+<link rel="stylesheet" href="../layui/css/layui.css">
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
+<script type="text/javascript">
+    var collectTime = [];
+    var QPS = [];
+    var TPS = [];
+
+    var SelectCount = [];
+    var UpdateCount = [];
+    var InsertCount = [];
+    var DeleteCount = [];
+
+    var ThreadsConnected = [];
+    var ThreadsRunning = [];
+    var MaxConnections = [];
+
+    var SlowQueries = [];
+    var BytesSent = [];
+    var BytesReceived = [];
+
+
+    setInterval(function(){
+
+        jQuery.ajax({
+            type: "GET",
+            url: "/result/getmonitordata",
+            data: {datalength:collectTime.length},
+            dataType: "json",
+            success: function(data){
+                for(var index = 0;index<data.data.length;index++){
+                    var Monitor =  data.data[index]
+                    collectTime.push(Monitor.collectTime);
+                    QPS.push(Monitor.qps);
+                    TPS.push(Monitor.tps);
+                    SelectCount.push(Monitor.selectCount);
+                    UpdateCount.push(Monitor.updateCount);
+                    InsertCount.push(Monitor.insertCount);
+                    DeleteCount.push(Monitor.deleteCount);
+                    ThreadsConnected.push(Monitor.threadsConnected);
+                    ThreadsRunning.push(Monitor.threadsRunning);
+                    MaxConnections.push(Monitor.maxConnections);
+                    SlowQueries.push(Monitor.slowQueries);
+                    BytesSent.push(Monitor.bytesSent);
+                    BytesReceived.push(Monitor.bytesReceived);
+                }
+
+            }
+        });
+        /**
+         * QPS TPS
+         * @type {HTMLElement | null}
+         */
+        var dom = document.getElementById("container");
+        var myChart = echarts.init(dom);
+
+        myChart.setOption({
+            title: {
+                text: 'QPS/TPS监控'
+            },
+            backgroundColor: '#ffffff',
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data:['QPS','TPS'],
+                "textStyle": {
+                    "fontSize": 18
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: collectTime
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    name:'QPS',
+                    type:'line',
+                    stack: '总量',
+                    data:QPS
+                },
+                {
+                    name:'TPS',
+                    type:'line',
+                    stack: '总量',
+                    data:TPS
+                }
+            ]
+        });
+
+
+        /**
+         * 查询新增
+         * @type {HTMLElement | null}
+         */
+        var dom1 = document.getElementById("container1");
+        var myChart1 = echarts.init(dom1);
+
+        myChart1.setOption({
+            title: {
+                text: '增删改查'
+            },
+            backgroundColor: '#ffffff',
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data:['SELECT','UPDATE','INSERT','DELETE'],
+                "textStyle": {
+                    "fontSize": 18
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: collectTime
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    name:'SELECT',
+                    type:'line',
+                    stack: '总量',
+                    data:SelectCount
+                },
+                {
+                    name:'UPDATE',
+                    type:'line',
+                    stack: '总量',
+                    data:UpdateCount
+                },
+                {
+                    name:'INSERT',
+                    type:'line',
+                    stack: '总量',
+                    data:InsertCount
+                },
+                {
+                    name:'DELETE',
+                    type:'line',
+                    stack: '总量',
+                    data:DeleteCount
+                }
+            ]
+        });
+
+
+        /**
+         * 连接数
+         * @type {HTMLElement | null}
+         */
+        var dom2 = document.getElementById("container2");
+        var myChart2 = echarts.init(dom2);
+
+        myChart2.setOption({
+            title: {
+                text: '连接数'
+            },
+            backgroundColor: '#ffffff',
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data:['连接数','实际使用连接数','最大连接数'],
+                "textStyle": {
+                    "fontSize": 18
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: collectTime
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    name:'连接数',
+                    type:'line',
+                    stack: '总量',
+                    data:ThreadsConnected
+                },
+                {
+                    name:'实际使用连接数',
+                    type:'line',
+                    stack: '总量',
+                    data:ThreadsRunning
+                },
+                {
+                    name:'最大连接数',
+                    type:'line',
+                    stack: '总量',
+                    data:MaxConnections
+                }
+            ]
+        });
+
+
+        var dom3 = document.getElementById("container3");
+        var myChart3 = echarts.init(dom3);
+        /**
+         * var BytesSent = [];
+         var BytesReceived = [];
+         */
+        myChart3.setOption({
+            title: {
+                text: '流量监控'
+            },
+            backgroundColor: '#ffffff',
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data:['发送量','接收量'],
+                "textStyle": {
+                    "fontSize": 18
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: collectTime
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    name:'发送量',
+                    type:'line',
+                    stack: '总量',
+                    data:BytesSent
+                },
+                {
+                    name:'接收量',
+                    type:'line',
+                    stack: '总量',
+                    data:BytesReceived
+                }
+            ]
+        });
+
+        jQuery('#connectionCount').html(ThreadsConnected[ThreadsConnected.length-1]);
+
+        jQuery('#isUseConnection').html(ThreadsRunning[ThreadsRunning.length-1]);
+
+        jQuery('#maxConnection').html(MaxConnections[MaxConnections.length-1]);
+        var startTime = collectTime[0];
+        var endTime = collectTime[collectTime.length-1];
+
+        var time1 = new Date(startTime);
+        var time2 = new Date(endTime);
+
+        var minus = Math.abs(time1.getTime() - time2.getTime())/1000/60;
+
+        jQuery('#runTime').html(minus+'分钟');
+
+    },2000);
+
+    setTimeout(function (){
+        window.onresize = function () {
+            myChart.resize();
+            myChart1.resize();
+            myChart2.resize();
+        }
+    },200)
+
+
+</script>

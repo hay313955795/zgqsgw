@@ -55,6 +55,15 @@ public class FileUtilCustom {
         return new FileCreateVo(targetPath+"("+times+")",true);
     }
 
+    public boolean deleteFile(String targetPath){
+        File targetFile = new File(targetPath);
+        if(targetFile.exists()){
+            return targetFile.delete();
+        }
+        return false;
+    }
+
+
     public static void main(String[] args) {
         Date d = new Date();
         System.out.println(d);

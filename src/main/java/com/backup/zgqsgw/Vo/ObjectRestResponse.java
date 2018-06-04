@@ -2,8 +2,10 @@ package com.backup.zgqsgw.Vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class ObjectRestResponse {
+public class ObjectRestResponse implements Serializable{
 
 
     private String message;
@@ -16,7 +18,6 @@ public class ObjectRestResponse {
     public ObjectRestResponse() {
 
     }
-
 
     public ObjectRestResponse(String message, boolean rel, int errorCode) {
         this.message = message;

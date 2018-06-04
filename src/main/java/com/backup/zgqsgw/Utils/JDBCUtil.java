@@ -1,6 +1,7 @@
 package com.backup.zgqsgw.Utils;
 
 import com.backup.zgqsgw.Entity.DBentity;
+import com.backup.zgqsgw.Entity.DBinfo;
 import com.backup.zgqsgw.Entity.InformatuonSchema;
 import com.backup.zgqsgw.Vo.ObjectRestResponse;
 
@@ -8,7 +9,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.StreamSupport;
 
 public class JDBCUtil {
 
@@ -74,6 +78,65 @@ public class JDBCUtil {
         }
     }
 
+    /**
+     * 监控数据库信息
+     * @param dBentity
+     * @return
+     */
+    public static ObjectRestResponse getDBInfo(DBentity dBentity) {
+
+        String driver = getDriverType(dBentity.getDbType());
+        String URL = getURL(dBentity);
+        Connection con = null;
+        ResultSet rs = null;
+        Statement st = null;
+        String sql = "SELECT * FROM information_schema.GLOBAL_STATUS";
+        try
+        {
+            Class.forName(driver);
+        }
+        catch(java.lang.ClassNotFoundException e)
+        {
+
+            System.out.println("Cant't load Driver");
+            return new ObjectRestResponse().message("数据库链接异常，请检查").rel(false);
+        }
+       try
+        {
+            DBinfo dBinfo = new DBinfo();
+            con=DriverManager.getConnection(URL,dBentity.getUser(),dBentity.getPassword());
+            st=con.createStatement();
+            rs=st.executeQuery(sql);
+            Map<String,String> allinfo = new HashMap<>();
+
+            while (rs.next()){
+
+                allinfo.put(rs.getString("VARIABLE_NAME"),rs.getString("VARIABLE_VALUE"));
+            }
+            dBinfo = (DBinfo) PojoUtils.getPojo(dBinfo,allinfo);
+            sql="SHOW VARIABLES LIKE 'max_connections'";
+            rs=st.executeQuery(sql);
+
+            if (rs.next()){
+                dBinfo.setMAX_CONNECTIONS(rs.getString("Value"));
+            }
+            dBinfo.setDbip(dBentity.getIp());
+            dBinfo.setSchemaname(dBentity.getSchemaname());
+            rs.close();
+            st.close();
+            con.close();
+            return new ObjectRestResponse().data(dBinfo).rel(true);
+        }
+        catch(Exception e)
+        {
+            System.out.println("Connect fail:" + e.getMessage());
+            return new ObjectRestResponse().message("数据库链接异常，请检查").rel(false);
+        }
+    }
+
+
+
+
 
     public static String getURL(DBentity dBentity){
         switch (dBentity.getDbType()){
@@ -95,20 +158,13 @@ public class JDBCUtil {
     }
 
 
+    public  void ttt(String... abc){
+
+        System.out.println(abc.length);
+        System.out.println(abc[0]);
+    }
     public static void main(String[] args) {
-        long startTimes = System.currentTimeMillis();
-        DBentity dBentity = new DBentity();
-        dBentity.setDbType("mysql");
-        dBentity.setIp("119.23.221.234");
-        dBentity.setSchemaname("app");
-        dBentity.setUser("three");
-        dBentity.setPassword("jsd1406");
-         ObjectRestResponse objectRestResponse= new JDBCUtil().getAllTableNamesByschemaname(dBentity);
-         if(objectRestResponse.isRel()){
-             List<InformatuonSchema> informatuonSchemaList =(List<InformatuonSchema>) objectRestResponse.getData();
-             informatuonSchemaList.forEach(informatuonSchema ->System.out.println(informatuonSchema));
-         }
-         System.out.println(System.currentTimeMillis()-startTimes);
+        new JDBCUtil().ttt("aa","aa","aaa");
     }
 
 }
