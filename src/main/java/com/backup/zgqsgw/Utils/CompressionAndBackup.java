@@ -85,4 +85,7 @@ public class CompressionAndBackup {
             e.printStackTrace();
         }
     }
+    //linux 环境下 安装了docker mysql  备份数据库的方式
+    //docker exec -it 46479d863337  mysqldump  company   -uroot -proot -h118.25.17.117 --skip-extended-insert --default-character-set=utf8 >/data/hhh111.sql
+
 }
