@@ -16,10 +16,10 @@ spring:
     hibernate:
       naming_strategy: org.hibernate.cfg.ImprovedNamingStrategy
       ddl-auto: update
-  activemq:
-    broker-url: tcp://118.25.17.117:61617
-    in-memory: true
-    pool:
-      enabled: false
+  #activemq:
+    #broker-url: tcp://118.25.17.117:61617
+    #in-memory: true
+    #pool:
+      #enabled: false
 
 

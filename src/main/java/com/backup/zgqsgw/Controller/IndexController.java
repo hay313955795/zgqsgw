@@ -2,13 +2,13 @@ package com.backup.zgqsgw.Controller;
 
 
 import com.backup.zgqsgw.Biz.DBentityBiz;
-import com.backup.zgqsgw.Biz.Producer;
+
 import com.backup.zgqsgw.Entity.DBentity;
 import com.backup.zgqsgw.Run.StartupRunner;
 import com.backup.zgqsgw.Utils.JDBCUtil;
 import com.backup.zgqsgw.Vo.ObjectRestResponse;
 
-import org.apache.activemq.command.ActiveMQQueue;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import redis.clients.jedis.Jedis;
@@ -19,11 +19,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.Resource;
-import javax.jms.Destination;
-import javax.servlet.http.HttpServletRequest;
-import java.util.Iterator;
-import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("")
@@ -38,8 +35,7 @@ public class IndexController {
     @Resource
     private StartupRunner startupRunner;
 
-    @Autowired
-    private Producer producer;
+
     /**
      * 返回填写数据库信息的页面
      * @return
@@ -47,35 +43,11 @@ public class IndexController {
     @GetMapping("/")
     public String index(Model model,HttpServletRequest httpServletRequest) throws Exception {
 
-        /**
-         * active mq
-         *  调用生产者往队列中存入数据 */
-             //Destination destination = new ActiveMQTempTopic("mytest1.queue");
-           /* Destination destination = new ActiveMQQueue("mytest1.queue");
-            for(int index=0;index<1000000;index++){
-                producer.sendMessage(destination,"aaaa"+index);
-            }
-        */
-        /**
-         * redis
-         */
 
-        /*Jedis jedis = new Jedis("localhost");
-        System.out.println(jedis.ping());
-        System.out.println(jedis.get("user"));
-        Set<String> keys = jedis.keys("*");
-        Iterator<String> it=keys.iterator() ;
-        while(it.hasNext()){
-            String key = it.next();
-            System.out.println(key);
-        }*/
         model.addAttribute("result",new ObjectRestResponse().rel(true));
         dBentityBiz.refreshApplication(httpServletRequest);
         return "index";
     }
-
-
-
 
     /**
      * 通过数据库信息获取所有表名称
@@ -86,7 +58,8 @@ public class IndexController {
     @PostMapping("/loaddbinfo")
     public String LoadDBInfo(DBentity dBentity, Model model, HttpServletRequest httpServletRequest) throws Exception {
 
-
+        //获得连接之后 不关闭连接
+        new JDBCUtil(dBentity);
 
         ObjectRestResponse objectRestResponse = JDBCUtil.getAllTableNamesByschemaname(dBentity);
         if(objectRestResponse.isRel()){

@@ -21,11 +21,17 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+
+import static com.backup.zgqsgw.Utils.JDBCUtil.doSQL;
+import static java.time.format.DateTimeFormatter.ofPattern;
 
 @RequestMapping("result")
 @RestController
@@ -49,7 +55,7 @@ public class ResultController {
      * @return
      */
     @PostMapping("/backup")
-    public ObjectRestResponse backup(String tablenames, HttpServletRequest httpServletRequest){
+    public ObjectRestResponse backup(String tablenames, HttpServletRequest httpServletRequest) throws IOException {
 
        if(StringUtils.isBlank(tablenames)) {
            return new  ObjectRestResponse("请选择需要备份的数据表",false,1);
@@ -60,29 +66,29 @@ public class ResultController {
         List<String> tablenamelist = Arrays.asList(tablenames.split(","));
 
         //在指定位置新建一个以时间开头的文件夹
-        Date nowDate = new Date();
-        System.out.println(nowDate);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        String dateNowStr = sdf.format(nowDate);
+        String dateNowStr = LocalDateTime.now().format(ofPattern("yyyy-MM-dd-HHmmss"));
         FileCreateVo fileCreateVo =  new FileUtilCustom().createFile(targetPath+"\\"+dateNowStr);
 
         if (fileCreateVo.isSuccess()){
             for (String name :tablenamelist){
-                 CompressionAndBackup.doSQL(mysqldumppath,dBentity.getSchemaname(),name,dBentity.getUser(),dBentity.getPassword(),dBentity.getIp(),fileCreateVo.getFilePath()+"\\"+name+".sql");
+
+                doSQL(dBentity.getSchemaname(),name,fileCreateVo.getFilePath());
+                // CompressionAndBackup.doSQL(mysqldumppath,dBentity.getSchemaname(),name,dBentity.getUser(),dBentity.getPassword(),dBentity.getIp(),fileCreateVo.getFilePath()+"\\"+name+".sql");
             }
 
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(2000);
-                        CompressionAndBackup.dozip(fileCreateVo.getFilePath(),fileCreateVo.getFilePath()+".zip");
-
-                    }catch (Exception e){
-
-                    }
-                }
-            }.start();
+            CompressionAndBackup.dozip(fileCreateVo.getFilePath(),fileCreateVo.getFilePath()+".zip");
+//            new Thread() {
+//                @Override
+//                public void run() {
+//                    try {
+//                        Thread.sleep(2000);
+//                        CompressionAndBackup.dozip(fileCreateVo.getFilePath(),fileCreateVo.getFilePath()+".zip");
+//
+//                    }catch (Exception e){
+//
+//                    }
+//                }
+//            }.start();
 
             /**
              * 可以将该压缩包以邮件的形式发送给对应的接收人
@@ -99,25 +105,17 @@ public class ResultController {
 
 
 
-
-
     /**
      * 查询数据库连接信息
      * @return
      */
     @GetMapping("/getinfo")
     public ObjectRestResponse getDBinfo(HttpServletRequest httpServletRequest){
-
         /**
          * 获取数据库配置信息
          */
         DBentity dBentity = (DBentity)httpServletRequest.getSession().getAttribute("dbinfo");
-       /* DBentity dBentity = new DBentity();
-        dBentity.setDbType("mysql");
-        dBentity.setIp("119.23.221.234");
-        dBentity.setPassword("jsd1406");
-        dBentity.setSchemaname("app");
-        dBentity.setUser("three");*/
+
         return JDBCUtil.getDBInfo(dBentity);
 
     }
@@ -130,16 +128,7 @@ public class ResultController {
     public ObjectRestResponse getMonitorData(HttpServletRequest httpServletRequest){
         DBentity dBentity = (DBentity)httpServletRequest.getSession().getAttribute("dbinfo");
         String datalength = httpServletRequest.getParameter("datalength");
-       /* System.out.println(datalength);
-        DBentity dBentity = new DBentity();
-        dBentity.setDbType("mysql");
-        dBentity.setIp("119.23.221.234");
-        dBentity.setPassword("jsd1406");
-        dBentity.setSchemaname("app");
-        dBentity.setUser("three");*/
-
         List<MonitorVo> monitorVoList = dBentityBiz.getDBMonitor(dBentity);
-
         return new ObjectRestResponse().rel(true).data( monitorVoList.subList(Integer.valueOf(datalength),monitorVoList.size()));
     }
 }
